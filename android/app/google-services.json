@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "334794123203",
+    "firebase_url": "https://girvihisab.firebaseio.com",
+    "project_id": "girvihisab",
+    "storage_bucket": "girvihisab.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:334794123203:android:78dea12ab8337d9097ff76",
+        "android_client_info": {
+          "package_name": "com.amarjewellers.girvihisab"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "334794123203-l2lhh5o8mh3522ricru9gg3hq8klgju1.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCbCgV0tckTqcaYx2pCqr9chZSjv-QKjOo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "334794123203-l2lhh5o8mh3522ricru9gg3hq8klgju1.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
