@@ -2,9 +2,18 @@
 import 'dart:io';
 
 import 'package:firebase/firebase.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+enum filters{
+  NAME,
+  DATE,
+  VALUE,
+  ITEM_TYPE,
+  ITEM_NAME
+}
 
 class Utils {
   static bool isiOS = Platform.isIOS;
@@ -13,6 +22,7 @@ class Utils {
   static SnackBar getSnackBarTime(String message, int time) => SnackBar(
     content: Text(message),
     duration: Duration(seconds: time),
+
   );
 
   static final GlobalKey<NavigatorState> navigatorKey = new GlobalKey<NavigatorState>();
@@ -90,6 +100,7 @@ class Utils {
       ],
     );
   }
+
 
 
 }

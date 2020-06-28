@@ -20,10 +20,11 @@ class _LoginScreenState extends State<LoginScreen> {
 
 
   Future<bool> isCorrect(){
-    return db.ref("users/${userNameController.text}").once('value').then((value){
+    return db.ref("users/${userNameController.text}").once('value').then((value) async {
       if(value.snapshot.val()!=null){
         if(value.snapshot.val()['password']==passwordController.text){
           db.ref("users/${userNameController.text}/last_login").set(DateTime.now().millisecondsSinceEpoch.toString());
+          (await Utils.getPrefs()).setString(USER_ID,userNameController.text);
           return true;
         }
         return false;

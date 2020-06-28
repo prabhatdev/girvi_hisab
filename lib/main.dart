@@ -5,6 +5,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:girvihisab/appTheme.dart';
 import 'package:girvihisab/screens/Home/HomeScreen.dart';
 import 'package:girvihisab/screens/Login/LoginScreen.dart';
+import 'package:girvihisab/screens/SearchResultScreen/SearchResultScreen.dart';
 import 'package:girvihisab/screens/SignUp/SignUpScreen.dart';
 import 'package:girvihisab/screens/Splash/SplashScreen.dart';
 import 'package:responsive_framework/responsive_wrapper.dart';
@@ -121,6 +122,7 @@ class _MyAppState extends State<MyApp> {
     Routes.LOGIN: (BuildContext context) => LoginScreen(),
     Routes.HOME: (BuildContext context) => HomeScreen(),
     Routes.SIGN_UP: (BuildContext context) => SignUpScreen(),
+    Routes.SEARCH_RESULT: (BuildContext context) => SearchResultScreen(),
     // Routes.SearchScreen: (BuildContext context) => ReservationsDetailsWrapper(),
 //    Routes.SearchScreen: (BuildContext context) => HomeScreen(),
   };
@@ -128,6 +130,7 @@ class _MyAppState extends State<MyApp> {
 
 class Routes {
   static const String HOME = "/home";
+  static const String SEARCH_RESULT = "/search_result";
   static const String LOGIN = "/login";
   static const String SIGN_UP = "/sign_up";
   static const String SPLASH = "/";
