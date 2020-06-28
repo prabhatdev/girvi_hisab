@@ -1,6 +1,9 @@
+import 'package:firebase/firebase.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:girvihisab/main.dart';
+import 'package:girvihisab/utils/constants.dart';
+import 'package:girvihisab/utils/utils.dart';
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -8,6 +11,27 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+
+  final GlobalKey<FormState> _formKey = new GlobalKey<FormState>();
+  final TextEditingController userNameController=TextEditingController();
+  final TextEditingController passwordController=TextEditingController();
+
+  Database db = database();
+
+
+  Future<bool> isCorrect(){
+    return db.ref("users/${userNameController.text}").once('value').then((value){
+      if(value.snapshot.val()!=null){
+        if(value.snapshot.val()['password']==passwordController.text){
+          db.ref("users/${userNameController.text}/last_login").set(DateTime.now().millisecondsSinceEpoch.toString());
+          return true;
+        }
+        return false;
+      }
+      return false;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -16,31 +40,65 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
         body: Padding(
           padding: const EdgeInsets.all(15),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              Text("Login",style: TextStyle(fontSize: 30),),
-              TextField(
-                decoration: InputDecoration(
-                  hintText: 'User Name'
-                ),
-              ),
-              TextField(
-                obscureText: true,
-                decoration: InputDecoration(
-                    hintText: 'Password'
-                ),
-              ),
-              RaisedButton(
-                child: Text("Login",style: TextStyle(fontSize: 20,color: Colors.white),),
-                onPressed: (){},
-              ),
-              InkWell(
-                  onTap: (){
-                        Navigator.pushNamed(context, Routes.SIGN_UP);
+          child: Form(
+            key: _formKey,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                Text("Login",style: TextStyle(fontSize: 30),),
+                TextFormField(
+                  validator: (value){
+                    if(value.isEmpty){
+                      return 'Enter username';
+                    }
+                    return null;
                   },
-                  child: Text("No Account? Sign Up",style: TextStyle(fontSize: 20),))
-            ],
+                  controller: userNameController,
+                  decoration: InputDecoration(
+                    hintText: 'Username',
+                    labelText: 'Username'
+                  ),
+                ),
+                TextFormField(
+                  validator: (value){
+                    if(value.isEmpty){
+                      return 'Enter password';
+                    }
+                    return null;
+                  },
+                  controller: passwordController,
+                  obscureText: true,
+                  decoration: InputDecoration(
+                      hintText: 'Password',
+                      labelText: 'Password',
+                  ),
+                ),
+                RaisedButton(
+                  child: Text("Login",style: TextStyle(fontSize: 20,color: Colors.white),),
+                  onPressed: (){
+
+                    if(_formKey.currentState.validate()){
+                      isCorrect().then((value) {
+                        if(value){
+                          Utils.getPrefs().then((prefs){
+                            prefs.setBool(IS_LOGGED_IN, true);
+                            Navigator.pushReplacementNamed(context, Routes.HOME);
+                          });
+                        }
+                        else{
+                          Utils.showToast("Invalid credentials");
+                        }
+                      });
+                    }
+                  },
+                ),
+                InkWell(
+                    onTap: (){
+                          Navigator.pushNamed(context, Routes.SIGN_UP);
+                    },
+                    child: Text("No Account? Sign Up",style: TextStyle(fontSize: 20),))
+              ],
+            ),
           ),
         ));
   }

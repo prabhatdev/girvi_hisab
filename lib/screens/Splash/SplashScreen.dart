@@ -7,11 +7,11 @@ class SplashScreen extends StatelessWidget {
 
   checkIsLoggedIn(BuildContext context){
     Utils.getPrefs().then((prefs){
-      if(prefs.getBool(IS_LOGGED_IN)!=null){
-        Navigator.pushReplacementNamed(context,Routes.HOME);
+      if(prefs.getBool(IS_LOGGED_IN)==null || !prefs.getBool(IS_LOGGED_IN)){
+        Navigator.pushReplacementNamed(context,Routes.LOGIN);
       }
       else{
-        Navigator.pushReplacementNamed(context, Routes.LOGIN);
+        Navigator.pushReplacementNamed(context, Routes.HOME);
       }
     });
   }
