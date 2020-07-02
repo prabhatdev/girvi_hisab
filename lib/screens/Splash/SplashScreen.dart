@@ -1,3 +1,6 @@
+import 'dart:convert';
+
+import 'package:firebase/firebase.dart';
 import 'package:flutter/material.dart';
 import 'package:girvihisab/main.dart';
 import 'package:girvihisab/utils/constants.dart';
@@ -5,13 +8,24 @@ import 'package:girvihisab/utils/utils.dart';
 
 class SplashScreen extends StatelessWidget {
 
+  Database db = database();
+
+
   checkIsLoggedIn(BuildContext context){
     Utils.getPrefs().then((prefs){
       if(prefs.getBool(IS_LOGGED_IN)==null || !prefs.getBool(IS_LOGGED_IN)){
         Navigator.pushReplacementNamed(context,Routes.LOGIN);
       }
       else{
-        Navigator.pushReplacementNamed(context, Routes.HOME);
+        String userId=prefs.getString(USER_ID);
+        db.ref("users/$userId").once("value").then((event) {
+          debugPrint(event.toString());
+          if(event.snapshot.val()!=null){
+            String json=jsonEncode(event.snapshot.val());
+            Utils.allData=json;
+            Navigator.pushReplacementNamed(context, Routes.HOME);
+          }
+        });
       }
     });
   }

@@ -33,19 +33,8 @@ Future<void> main() async {
 final RouteObserver<PageRoute> routeObserver = RouteObserver<PageRoute>();
 
 class MyApp extends StatefulWidget {
-  static restartApp(BuildContext context) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    prefs.clear();
 
-    final _MyAppState state = context.findAncestorStateOfType<_MyAppState>();
 
-    state.restartApp();
-  }
-
-  static setCustomeTheme(BuildContext context) {
-    final _MyAppState state = context.findAncestorStateOfType<_MyAppState>();
-    state.setCustomeTheme();
-  }
 
   @override
   _MyAppState createState() => _MyAppState();
@@ -57,24 +46,9 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-    this.initPlatformState();
   }
 
-  Future<void> initPlatformState() async {
-    if (!mounted) return;
-  }
 
-  void restartApp() {
-    this.setState(() {
-      key = new UniqueKey();
-    });
-  }
-
-  void setCustomeTheme() {
-    setState(() {
-      AppTheme.isLightTheme = !AppTheme.isLightTheme;
-    });
-  }
 
   @override
   Widget build(BuildContext context) {

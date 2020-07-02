@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_date_pickers/flutter_date_pickers.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:girvihisab/main.dart';
+import 'package:girvihisab/screens/Home/HomeScreen.dart';
 import 'package:girvihisab/utils/constants.dart';
 import 'package:girvihisab/utils/utils.dart';
 import 'package:intl/intl.dart';
@@ -33,7 +34,7 @@ class _SearchItemScreenState extends State<SearchItemScreen> {
 
   List<String> name = List<String>();
   List<String> itemNames = List<String>();
-  List<String> itemTypes = List<String>();
+  List<String> itemTypes = ['gold','silver','other'];
   String userId = '';
   List searchResult=List();
   Map customers=Map();
@@ -47,15 +48,13 @@ class _SearchItemScreenState extends State<SearchItemScreen> {
 
   fetchAllData() {
     Utils.getPrefs().then((prefs) {
-      String allDataJson = prefs.getString(ALL_DATA);
+      String allDataJson = Utils.allData;
       userId = prefs.getString(USER_ID);
       Map<String, dynamic> userData = jsonDecode(allDataJson);
       if (userData['customers'] != null) {
         name.clear();
         itemNames.clear();
-        itemTypes.clear();
         Map<String, dynamic> customers = userData['customers'];
-        Map<String, dynamic> itemType = userData['itemTypes'];
         Map<String, dynamic> itemName = userData['itemsNames'];
         customers.forEach((key, value) {
           name.add(key.toString().toLowerCase());
@@ -68,9 +67,6 @@ class _SearchItemScreenState extends State<SearchItemScreen> {
         });
         itemName.forEach((key, value) {
           itemNames.add(key.toString().toLowerCase());
-        });
-        itemType.forEach((key, value) {
-          itemTypes.add(key.toString().toLowerCase());
         });
       }
     });
@@ -183,9 +179,7 @@ class _SearchItemScreenState extends State<SearchItemScreen> {
                 );
               },
               noItemsFoundBuilder: (context) {
-                return ListTile(
-                  title: Text("User not found! New User"),
-                );
+                return SizedBox.shrink();
               },
               onSuggestionSelected: (suggestion) {
                 nameController.text = suggestion;
@@ -240,9 +234,7 @@ class _SearchItemScreenState extends State<SearchItemScreen> {
                 );
               },
               noItemsFoundBuilder: (context) {
-                return ListTile(
-                  title: Text("New Item"),
-                );
+                return SizedBox.shrink();
               },
               onSuggestionSelected: (suggestion) {
                 itemNameController.text = suggestion;
@@ -266,9 +258,7 @@ class _SearchItemScreenState extends State<SearchItemScreen> {
                 );
               },
               noItemsFoundBuilder: (context) {
-                return ListTile(
-                  title: Text("New Item Type"),
-                );
+                return SizedBox.shrink();
               },
               onSuggestionSelected: (suggestion) {
                 itemTypeController.text = suggestion;

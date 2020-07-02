@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:firebase/firebase.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -24,7 +26,6 @@ class _LoginScreenState extends State<LoginScreen> {
       if(value.snapshot.val()!=null){
         if(value.snapshot.val()['password']==passwordController.text){
           db.ref("users/${userNameController.text}/last_login").set(DateTime.now().millisecondsSinceEpoch.toString());
-          (await Utils.getPrefs()).setString(USER_ID,userNameController.text);
           return true;
         }
         return false;
@@ -37,6 +38,7 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
+          automaticallyImplyLeading: false,
           title: Text("Login"),
         ),
         body: Padding(
@@ -83,7 +85,16 @@ class _LoginScreenState extends State<LoginScreen> {
                         if(value){
                           Utils.getPrefs().then((prefs){
                             prefs.setBool(IS_LOGGED_IN, true);
-                            Navigator.pushReplacementNamed(context, Routes.HOME);
+                            prefs.setString(USER_ID,userNameController.text);
+                                String userId=userNameController.text;
+                                db.ref("users/$userId").once("value").then((event) {
+                                  debugPrint(event.toString());
+                                  if(event.snapshot.val()!=null){
+                                    String json=jsonEncode(event.snapshot.val());
+                                    Utils.allData=json;
+                                    Navigator.pushReplacementNamed(context, Routes.HOME);
+                                  }
+                            });
                           });
                         }
                         else{

@@ -23,11 +23,13 @@ class _AddItemScreenState extends State<AddItemScreen> {
   final TextEditingController nameController = TextEditingController();
   final TextEditingController dateController = TextEditingController();
   final TextEditingController itemNameController = TextEditingController();
-  final TextEditingController itemTypeController = TextEditingController();
+  final TextEditingController itemWeightController = TextEditingController();
   final TextEditingController itemValueController = TextEditingController();
   final TextEditingController rateController = TextEditingController();
   final df = new DateFormat('dd/MM/yyyy');
   String interestType='monthly';
+  String weightType='g';
+  String itemType='silver';
   List<String> name = List<String>();
   List<String> itemNames = List<String>();
   List<String> itemTypes = List<String>();
@@ -35,7 +37,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
 
   fetchAllData() {
     Utils.getPrefs().then((prefs) {
-      String allDataJson = prefs.getString(ALL_DATA);
+      String allDataJson = Utils.allData;
       userId = prefs.getString(USER_ID);
       Map userData = jsonDecode(allDataJson);
       if (userData['customers'] != null) {
@@ -87,7 +89,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
       child: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             TypeAheadFormField(
               validator: (value) {
@@ -101,6 +103,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
               },
               textFieldConfiguration: TextFieldConfiguration(
                 controller: nameController,
+                autofocus: false,
                 decoration: InputDecoration(
                   labelText: 'Name',
                 ),
@@ -112,9 +115,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
                 );
               },
               noItemsFoundBuilder: (context) {
-                return ListTile(
-                  title: Text("User not found! New User"),
-                );
+                return SizedBox.shrink();
               },
               onSuggestionSelected: (suggestion) {
                 nameController.text = suggestion;
@@ -128,6 +129,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
                 }
                 return null;
               },
+              autofocus: false,
               decoration: InputDecoration(
                   labelText: 'Date',
                   hintText: '25/05/2020',
@@ -160,10 +162,25 @@ class _AddItemScreenState extends State<AddItemScreen> {
                 return itemNames.where((element) => element.contains(pattern.toLowerCase())).toList();
               },
               textFieldConfiguration: TextFieldConfiguration(
+                autofocus: false,
                 controller: itemNameController,
                 decoration: InputDecoration(
-                  labelText: 'Item Name',
-                  hintText: 'Chain, Payal etc',
+                    labelText: 'Item Name',
+                    hintText: 'Chain, Payal etc',
+                    suffixIcon: DropdownButton<String>(
+                      items: <String>['gold', 'silver','other'].map((String value) {
+                        return new DropdownMenuItem<String>(
+                          value: value,
+                          child: new Text(value),
+                        );
+                      }).toList(),
+                      onChanged: (type) {
+                        setState(() {
+                          itemType=type;
+                        });
+                      },
+                      value: itemType,
+                    )
                 ),
               ),
               itemBuilder: (context, suggestion) {
@@ -173,59 +190,64 @@ class _AddItemScreenState extends State<AddItemScreen> {
                 );
               },
               noItemsFoundBuilder: (context) {
-                return ListTile(
-                  title: Text("New Item"),
-                );
+                return SizedBox.shrink();
               },
               onSuggestionSelected: (suggestion) {
                 itemNameController.text = suggestion;
               },
             ),
-            TypeAheadFormField(
-              validator: (value) {
-                if (value.isEmpty) {
-                  return 'Please enter item type';
-                }
-                return null;
-              },
-              suggestionsCallback: (pattern) {
-                return itemTypes.where((element) => element.contains(pattern.toLowerCase())).toList();
-              },
-              textFieldConfiguration: TextFieldConfiguration(
-                controller: itemTypeController,
-                decoration: InputDecoration(
-                  labelText: 'Item Type',
-                  hintText: 'Gold, Silver, etc',
+
+            Row(
+              children: [
+                Flexible(
+                  child: TextFormField(
+                    controller: itemValueController,
+                    keyboardType: TextInputType.numberWithOptions(signed: false,decimal: true),
+                    validator: (value) {
+                      if (value.isEmpty) {
+                        return 'Please enter item value';
+                      }
+                      return null;
+                    },
+                    decoration: InputDecoration(
+                      labelText: 'Item Value',
+                    ),
+                  ),
                 ),
-              ),
-              itemBuilder: (context, suggestion) {
-                return ListTile(
-                  leading: Icon(Icons.person),
-                  title: Text(suggestion),
-                );
-              },
-              noItemsFoundBuilder: (context) {
-                return ListTile(
-                  title: Text("New Item Type"),
-                );
-              },
-              onSuggestionSelected: (suggestion) {
-                itemTypeController.text = suggestion;
-              },
+                SizedBox(width: 10,),
+                Flexible(
+                  child: TextFormField(
+                    controller: itemWeightController,
+                    inputFormatters: [WhitelistingTextInputFormatter.digitsOnly],
+                    validator: (value) {
+                      if (value.isEmpty) {
+                        return 'Please enter weight';
+                      }
+                      return null;
+                    },
+                    decoration: InputDecoration(
+                        labelText: 'Weight',
+                        suffixIcon: DropdownButton<String>(
+                          items: <String>['g', 'mg'].map((String value) {
+                            return new DropdownMenuItem<String>(
+                              value: value,
+                              child: new Text(value),
+                            );
+                          }).toList(),
+                          onChanged: (type) {
+                            setState(() {
+                              weightType=type;
+                            });
+                          },
+                          value: weightType,
+                        )
+                    ),
+                  ),
+                ),
+
+              ],
             ),
-            TextFormField(
-              controller: itemValueController,
-              inputFormatters: [WhitelistingTextInputFormatter.digitsOnly],
-              validator: (value) {
-                if (value.isEmpty) {
-                  return 'Please enter item value';
-                }
-                return null;
-              },
-              decoration: InputDecoration(
-                labelText: 'Item Value',
-              ),
-            ),
+
             TextFormField(
               controller: rateController,
               validator: (value) {
@@ -234,8 +256,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
                 }
                 return null;
               },
-              inputFormatters: [WhitelistingTextInputFormatter.digitsOnly],
-              keyboardType: TextInputType.number,
+              keyboardType: TextInputType.numberWithOptions(signed: false,decimal: true),
               decoration: InputDecoration(
                   suffixIcon: DropdownButton<String>(
                     items: <String>['monthly', 'yearly'].map((String value) {
@@ -245,13 +266,17 @@ class _AddItemScreenState extends State<AddItemScreen> {
                       );
                     }).toList(),
                     onChanged: (type) {
+                      setState(() {
                         interestType=type;
+                      });
                     },
-                    value: 'monthly',
+                    value: interestType,
                   ),
                   hintText: 'Interest in %',
                   labelText: 'Rate Of Interest', suffixText: "%"),
             ),
+
+
             RaisedButton(
               child: Text(
                 "Add Item",
@@ -265,13 +290,13 @@ class _AddItemScreenState extends State<AddItemScreen> {
                     'date': date,
                     'name': nameController.text,
                     'item_name': itemNameController.text,
-                    'item_types': itemTypeController.text,
+                    'item_types': itemType,
                     'value': itemValueController.text,
                     'interest': rateController.text,
-                    'interest_type': interestType
+                    'interest_type': interestType,
+                    'weight': itemWeightController.text+weightType,
                   });
                   await db.ref("users/${userId}/itemsNames/${itemNameController.text.toLowerCase()}").set(1);
-                  await db.ref("users/${userId}/itemTypes/${itemTypeController.text.toLowerCase()}").set(1);
                   Utils.showToast("Item Added");
                   _formKey.currentState.reset();
                   fetchAllData();

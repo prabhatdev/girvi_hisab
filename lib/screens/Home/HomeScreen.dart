@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:firebase/firebase.dart';
@@ -9,6 +10,7 @@ import 'package:girvihisab/utils/constants.dart';
 import 'package:girvihisab/utils/utils.dart';
 
 class HomeScreen extends StatefulWidget {
+
   @override
   _HomeScreenState createState() => _HomeScreenState();
 }
@@ -17,8 +19,7 @@ class _HomeScreenState extends State<HomeScreen> {
   int selectedIndex=0;
   Database db = database();
 
-
-  static List<Widget> _widgetOptions = <Widget>[
+   List<Widget> _widgetOptions = <Widget>[
     SearchItemScreen(),
     AddItemScreen(),
     Text(
@@ -27,6 +28,10 @@ class _HomeScreenState extends State<HomeScreen> {
   ];
 
 
+  @override
+  void dispose() {
+    super.dispose();
+  }
 
   @override
   void initState() {
@@ -36,7 +41,7 @@ class _HomeScreenState extends State<HomeScreen> {
       db.ref("users/$userId").onValue.listen((event) {
           if(event.snapshot.val()!=null){
             String json=jsonEncode(event.snapshot.val());
-            prefs.setString(ALL_DATA, json);
+            Utils.allData=json;
           }
       });
     });

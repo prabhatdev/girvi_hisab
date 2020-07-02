@@ -25,6 +25,8 @@ class Utils {
 
   );
 
+  static String allData='';
+
   static final GlobalKey<NavigatorState> navigatorKey = new GlobalKey<NavigatorState>();
 
   static SnackBar getSnackBar(String message) => SnackBar(content: Text(message));
