@@ -5,6 +5,7 @@ import 'package:firebase/firebase.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:rxdart/subjects.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 enum filters{
@@ -25,7 +26,12 @@ class Utils {
 
   );
 
-  static String allData='';
+  static var allData;
+  static String userId='';
+  static String goldRate='';
+  static String goldTunchRate='';
+  static String silverRate='';
+  static String silverTunchRate='';
 
   static final GlobalKey<NavigatorState> navigatorKey = new GlobalKey<NavigatorState>();
 
@@ -34,6 +40,17 @@ class Utils {
   static Future<SharedPreferences> getPrefs() async {
     SharedPreferences preferences=await SharedPreferences.getInstance();
     return preferences;
+  }
+
+  static setRates(value){
+    Utils.allData=value;
+    var rates=value['rates']??null;
+    if(rates!=null){
+      Utils.goldRate=rates['gold_rate']??'';
+      Utils.goldTunchRate=rates['gold_tunch_rate']??'';
+      Utils.silverRate=rates['silver_rate']??'';
+      Utils.silverTunchRate=rates['silver_tunch_rate']??'';
+    }
   }
 
   static bool isValidEmail(String email) {

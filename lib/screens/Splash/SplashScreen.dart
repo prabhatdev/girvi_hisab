@@ -17,12 +17,12 @@ class SplashScreen extends StatelessWidget {
         Navigator.pushReplacementNamed(context,Routes.LOGIN);
       }
       else{
-        String userId=prefs.getString(USER_ID);
-        db.ref("users/$userId").once("value").then((event) {
+        Utils.userId=prefs.getString(USER_ID);
+
+        db.ref("users/${Utils.userId}").once("value").then((event) {
           debugPrint(event.toString());
           if(event.snapshot.val()!=null){
-            String json=jsonEncode(event.snapshot.val());
-            Utils.allData=json;
+            Utils.setRates(event.snapshot.val());
             Navigator.pushReplacementNamed(context, Routes.HOME);
           }
         });

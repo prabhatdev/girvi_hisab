@@ -36,10 +36,9 @@ class _AddItemScreenState extends State<AddItemScreen> {
   String userId = '';
 
   fetchAllData() {
-    Utils.getPrefs().then((prefs) {
-      String allDataJson = Utils.allData;
-      userId = prefs.getString(USER_ID);
-      Map userData = jsonDecode(allDataJson);
+
+      userId = Utils.userId;
+      Map userData = Utils.allData as Map;
       if (userData['customers'] != null) {
         name.clear();
         itemNames.clear();
@@ -57,7 +56,6 @@ class _AddItemScreenState extends State<AddItemScreen> {
           itemTypes.add(key.toString().toLowerCase());
         });
       }
-    });
   }
 
   Widget buildDatePicker(Function onSelected) {
@@ -202,6 +200,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
                 Flexible(
                   child: TextFormField(
                     controller: itemValueController,
+                    autofocus: false,
                     keyboardType: TextInputType.numberWithOptions(signed: false,decimal: true),
                     validator: (value) {
                       if (value.isEmpty) {
@@ -217,6 +216,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
                 SizedBox(width: 10,),
                 Flexible(
                   child: TextFormField(
+                    autofocus: false,
                     controller: itemWeightController,
                     inputFormatters: [WhitelistingTextInputFormatter.digitsOnly],
                     validator: (value) {
@@ -249,6 +249,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
             ),
 
             TextFormField(
+              autofocus: false,
               controller: rateController,
               validator: (value) {
                 if (value.isEmpty) {

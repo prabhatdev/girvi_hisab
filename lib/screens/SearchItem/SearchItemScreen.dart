@@ -47,10 +47,8 @@ class _SearchItemScreenState extends State<SearchItemScreen> {
   }
 
   fetchAllData() {
-    Utils.getPrefs().then((prefs) {
-      String allDataJson = Utils.allData;
-      userId = prefs.getString(USER_ID);
-      Map<String, dynamic> userData = jsonDecode(allDataJson);
+      userId=Utils.userId;
+      Map<String, dynamic> userData = Utils.allData as Map;
       if (userData['customers'] != null) {
         name.clear();
         itemNames.clear();
@@ -69,7 +67,6 @@ class _SearchItemScreenState extends State<SearchItemScreen> {
           itemNames.add(key.toString().toLowerCase());
         });
       }
-    });
   }
 
   searchAll(filter) async{

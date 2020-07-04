@@ -87,11 +87,11 @@ class _LoginScreenState extends State<LoginScreen> {
                             prefs.setBool(IS_LOGGED_IN, true);
                             prefs.setString(USER_ID,userNameController.text);
                                 String userId=userNameController.text;
+                                Utils.userId=userId;
                                 db.ref("users/$userId").once("value").then((event) {
                                   debugPrint(event.toString());
                                   if(event.snapshot.val()!=null){
-                                    String json=jsonEncode(event.snapshot.val());
-                                    Utils.allData=json;
+                                    Utils.setRates(event.snapshot.val());
                                     Navigator.pushReplacementNamed(context, Routes.HOME);
                                   }
                             });
