@@ -35,7 +35,8 @@ dependencies:
   intl: ^0.16.1
   flutter_typeahead: ^1.8.3
   rxdart: ^0.24.1
-
+  string_validator: ^0.1.4
+  flutter_tagging: ^2.2.0+3
 
 
   # The following adds the Cupertino Icons font to your application.

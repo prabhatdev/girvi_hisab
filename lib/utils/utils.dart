@@ -16,8 +16,15 @@ enum filters{
   ITEM_NAME
 }
 
+class Pair{
+  var left;
+  var right;
+  Pair(this.left,this.right);
+}
+
 class Utils {
   static bool isiOS = Platform.isIOS;
+
 
 
   static SnackBar getSnackBarTime(String message, int time) => SnackBar(
@@ -40,6 +47,10 @@ class Utils {
   static Future<SharedPreferences> getPrefs() async {
     SharedPreferences preferences=await SharedPreferences.getInstance();
     return preferences;
+  }
+
+  static capitalize(String s){
+    return '${s[0].toUpperCase()}${s.substring(1)}';
   }
 
   static setRates(value){
