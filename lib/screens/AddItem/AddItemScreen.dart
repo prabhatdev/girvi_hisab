@@ -114,74 +114,87 @@ class _AddItemScreenState extends State<AddItemScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  TypeAheadFormField(
-                    validator: (value) {
-                      if (value.isEmpty) {
-                        return 'Please enter item name';
-                      }
-                      return null;
-                    },
-                    suggestionsCallback: (pattern) {
-                      return itemNames.where((element) => element.contains(pattern.toLowerCase())).toList();
-                    },
-                    textFieldConfiguration: TextFieldConfiguration(
-                      autofocus: false,
-                      controller: itemNameController,
-                      decoration: InputDecoration(
-                          labelText: 'Item Name',
-                          hintText: 'Chain, Payal etc',
-                          suffixIcon: StreamBuilder<String>(
-                            stream: itemTypeController.stream.asBroadcastStream(),
-                            builder: (context, snapshot) {
-                              return DropdownButton<String>(
-                                items: <String>['gold', 'silver', 'other'].map((String value) {
-                                  return new DropdownMenuItem<String>(
-                                    value: value,
-                                    child: new Text(value),
-                                  );
-                                }).toList(),
-                                onChanged: (type) {
-                                    itemType = type;
-                                    itemTypeController.sink.add(itemType);
-                                },
-                                value: itemType,
-                              );
+                  Row(
+                    children: [
+                      Flexible(
+                        child: TypeAheadFormField(
+                          validator: (value) {
+                            if (value.isEmpty) {
+                              return 'Please enter item name';
                             }
-                          )),
-                    ),
-                    itemBuilder: (context, suggestion) {
-                      return ListTile(
-                        leading: Icon(Icons.person),
-                        title: Text(suggestion),
-                      );
-                    },
-                    noItemsFoundBuilder: (context) {
-                      return SizedBox.shrink();
-                    },
-                    onSuggestionSelected: (suggestion) {
-                      itemNameController.text = suggestion;
-                    },
+                            return null;
+                          },
+                          suggestionsCallback: (pattern) {
+                            return itemNames.where((element) => element.contains(pattern.toLowerCase())).toList();
+                          },
+                          textFieldConfiguration: TextFieldConfiguration(
+                            autofocus: false,
+                            controller: itemNameController,
+                            decoration: InputDecoration(
+                                labelText: 'Item Name',
+                                hintText: 'Chain, Payal etc',
+                            ),
+                          ),
+                          itemBuilder: (context, suggestion) {
+                            return ListTile(
+                              leading: Icon(Icons.person),
+                              title: Text(suggestion),
+                            );
+                          },
+                          noItemsFoundBuilder: (context) {
+                            return SizedBox.shrink();
+                          },
+                          onSuggestionSelected: (suggestion) {
+                            itemNameController.text = suggestion;
+                          },
+                        ),
+                      ),
+                      StreamBuilder<String>(
+                          stream: itemTypeController.stream.asBroadcastStream(),
+                          builder: (context, snapshot) {
+                            return DropdownButton<String>(
+                              items: <String>['gold', 'silver', 'other'].map((String value) {
+                                return new DropdownMenuItem<String>(
+                                  value: value,
+                                  child: new Text(value),
+                                );
+                              }).toList(),
+                              onChanged: (type) {
+                                itemType = type;
+                                itemTypeController.sink.add(itemType);
+                              },
+                              value: itemType,
+                            );
+                          }
+                      )
+                    ],
                   ),
                   SizedBox(
                     height: 10,
                   ),
-                  TextFormField(
-                    keyboardType: TextInputType.numberWithOptions(signed: false,decimal: true),
-                    autofocus: false,
-                    controller: itemWeightController,
-                    inputFormatters: [DecimalTextInputFormatter()],
-                    validator: (value) {
-                      if (value.isEmpty) {
-                        return 'Please enter weight';
-                      }
-                      if (!isFloat(value) && !isInt(value)) {
-                        return 'Enver valid weight';
-                      }
-                      return null;
-                    },
-                    decoration: InputDecoration(
-                        labelText: 'Weight',
-                        suffixIcon: StreamBuilder<String>(
+                  Row(
+                    children: [
+                      Flexible(
+                        child: TextFormField(
+                          keyboardType: TextInputType.numberWithOptions(signed: false,decimal: true),
+                          autofocus: false,
+                          controller: itemWeightController,
+                          inputFormatters: [DecimalTextInputFormatter()],
+                          validator: (value) {
+                            if (value.isEmpty) {
+                              return 'Please enter weight';
+                            }
+                            if (!isFloat(value) && !isInt(value)) {
+                              return 'Enter valid weight';
+                            }
+                            return null;
+                          },
+                          decoration: InputDecoration(
+                              labelText: 'Weight',
+                          ),
+                        ),
+                      ),
+                      StreamBuilder<String>(
                           stream: weightTypeController.stream.asBroadcastStream(),
                           builder: (context, snapshot) {
                             return DropdownButton<String>(
@@ -192,13 +205,14 @@ class _AddItemScreenState extends State<AddItemScreen> {
                                 );
                               }).toList(),
                               onChanged: (type) {
-                                  weightType = type;
+                                weightType = type;
                                 weightTypeController.sink.add(weightType);
                               },
                               value: weightType,
                             );
                           }
-                        )),
+                      )
+                    ],
                   ),
                   SizedBox(
                     height: 10,
@@ -214,7 +228,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
                       }
 
                       if (!isFloat(value) && !isInt(value)) {
-                        return 'Enver valid tunch';
+                        return 'Enter valid tunch';
                       }
                       return null;
                     },
@@ -583,38 +597,44 @@ class _AddItemScreenState extends State<AddItemScreen> {
                     width: 10,
                   ),
                   Flexible(
-                    child: TextFormField(
-                      autofocus: false,
-                      controller: rateController,
-                      validator: (value) {
-                        if (value.isEmpty) {
-                          return 'Please enter rate of interest';
-                        }
-                        if (!isFloat(value) && !isInt(value)) {
-                          return 'Enver valid interest amount';
-                        }
-                        return null;
-                      },
-                      inputFormatters: [DecimalTextInputFormatter()],
-                      keyboardType: TextInputType.numberWithOptions(signed: false, decimal: true),
-                      decoration: InputDecoration(
-                          suffixIcon: DropdownButton<String>(
-                            items: <String>['monthly', 'yearly'].map((String value) {
-                              return new DropdownMenuItem<String>(
-                                value: value,
-                                child: new Text(value),
-                              );
-                            }).toList(),
-                            onChanged: (type) {
-                              setState(() {
-                                interestType = type;
-                              });
+                    child: Row(
+                      children: [
+                        Flexible(
+                          child: TextFormField(
+                            autofocus: false,
+                            controller: rateController,
+                            validator: (value) {
+                              if (value.isEmpty) {
+                                return 'Please enter rate of interest';
+                              }
+                              if (!isFloat(value) && !isInt(value)) {
+                                return 'Enter valid interest amount';
+                              }
+                              return null;
                             },
-                            value: interestType,
+                            inputFormatters: [DecimalTextInputFormatter()],
+                            keyboardType: TextInputType.numberWithOptions(signed: false, decimal: true),
+                            decoration: InputDecoration(
+                                hintText: 'Interest in %',
+                                labelText: 'Rate Of Interest',
+                                suffixText: "%"),
                           ),
-                          hintText: 'Interest in %',
-                          labelText: 'Rate Of Interest',
-                          suffixText: "%"),
+                        ),
+                        DropdownButton<String>(
+                          items: <String>['monthly', 'yearly'].map((String value) {
+                            return new DropdownMenuItem<String>(
+                              value: value,
+                              child: new Text(value),
+                            );
+                          }).toList(),
+                          onChanged: (type) {
+                            setState(() {
+                              interestType = type;
+                            });
+                          },
+                          value: interestType,
+                        ),
+                      ],
                     ),
                   ),
                 ],

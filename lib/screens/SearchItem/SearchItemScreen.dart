@@ -119,6 +119,9 @@ class _SearchItemScreenState extends State<SearchItemScreen> {
             return foundCount == selectedItems.length;
           }).toList();
         }
+        searchResult.sort((a,b){
+          return int.parse(a['date'])<int.parse(b['date'])?1:-1;
+        });
         loaderController.sink.add(false);
         if (searchResult.isEmpty) {
           Utils.showToast("No results found");

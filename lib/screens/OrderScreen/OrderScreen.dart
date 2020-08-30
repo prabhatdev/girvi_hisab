@@ -25,6 +25,7 @@ class _OrderScreenState extends State<OrderScreen> {
   List<Settlement> settlement = List<Settlement>();
 
   StreamController settlementsController = StreamController.broadcast();
+  StreamController dataFetchController = StreamController.broadcast();
 
   Database db = database();
   double todayValue = 0;
@@ -33,11 +34,13 @@ class _OrderScreenState extends State<OrderScreen> {
   void dispose() {
     super.dispose();
     settlementsController.close();
+    dataFetchController.close();
   }
 
   DateTime tillDate = DateTime.now();
 
-  double interest(DateTime d1, DateTime d2, double interestRate, double principle, bool isMonthly) {
+  double interest(DateTime d1, DateTime d2, double interestRate,
+      double principle, bool isMonthly) {
     int days = d2.difference(d1).inDays;
     double totalInterest = 0;
     if (isMonthly) {
@@ -49,8 +52,10 @@ class _OrderScreenState extends State<OrderScreen> {
   }
 
   initialiseAll(settlements) {
-    settlement.add(
-        Settlement(principle: double.parse(orderDetails['principle']), date: DateTime.fromMillisecondsSinceEpoch(int.parse(orderDetails['date']))));
+    settlement.add(Settlement(
+        principle: double.parse(orderDetails['principle']),
+        date: DateTime.fromMillisecondsSinceEpoch(
+            int.parse(orderDetails['date']))));
 
     if (settlements != null) {
       var settlementList = [];
@@ -61,7 +66,8 @@ class _OrderScreenState extends State<OrderScreen> {
       settlementList.forEach((element) {
         settlement.add(Settlement(
             principle: double.parse(element['amount']),
-            date: DateTime.fromMillisecondsSinceEpoch(int.parse(element['date'])),
+            date:
+                DateTime.fromMillisecondsSinceEpoch(int.parse(element['date'])),
             remark: element['remarks'] ?? ''));
       });
     }
@@ -77,17 +83,26 @@ class _OrderScreenState extends State<OrderScreen> {
         'remarks': settlement[i].remark ?? ''
       };
     }
-    db.ref("users/${Utils.userId}/customers/${orderDetails['name']}/${orderDetails['key']}/settlements").set(dataToSet);
+    db
+        .ref(
+            "users/${Utils.userId}/customers/${orderDetails['name']}/${orderDetails['key']}/settlements")
+        .set(dataToSet);
   }
 
   findSettlements(bool isUpdate) {
     settlement.sort((a, b) {
-      return (a.date.millisecondsSinceEpoch < b.date.millisecondsSinceEpoch) ? -1 : 1;
+      return (a.date.millisecondsSinceEpoch < b.date.millisecondsSinceEpoch)
+          ? -1
+          : 1;
     });
     if (isUpdate) updateData();
     for (int i = 0; i < settlement.length; i++) {
       settlement[i].interest = interest(
-          settlement[i].date, tillDate, double.parse(orderDetails['interest']), settlement[i].principle, orderDetails['interest_type'] == 'monthly');
+          settlement[i].date,
+          tillDate,
+          double.parse(orderDetails['interest']),
+          settlement[i].principle,
+          orderDetails['interest_type'] == 'monthly');
     }
     double totalInterest = settlement.first.interest;
     double totalPrinciple = settlement.first.principle;
@@ -143,17 +158,22 @@ class _OrderScreenState extends State<OrderScreen> {
   Widget buildDatePicker(Function onSelected) {
     // add some colors to default settings
     DatePickerRangeStyles styles = DatePickerRangeStyles(
-      selectedPeriodLastDecoration:
-          BoxDecoration(color: Colors.red, borderRadius: BorderRadius.only(topRight: Radius.circular(10.0), bottomRight: Radius.circular(10.0))),
+      selectedPeriodLastDecoration: BoxDecoration(
+          color: Colors.red,
+          borderRadius: BorderRadius.only(
+              topRight: Radius.circular(10.0),
+              bottomRight: Radius.circular(10.0))),
       selectedPeriodStartDecoration: BoxDecoration(
         color: Colors.green,
-        borderRadius: BorderRadius.only(topLeft: Radius.circular(10.0), bottomLeft: Radius.circular(10.0)),
+        borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(10.0), bottomLeft: Radius.circular(10.0)),
       ),
-      selectedPeriodMiddleDecoration: BoxDecoration(color: Colors.yellow, shape: BoxShape.rectangle),
+      selectedPeriodMiddleDecoration:
+          BoxDecoration(color: Colors.yellow, shape: BoxShape.rectangle),
     );
 
     return dp.DayPicker(
-      firstDate: DateTime.fromMillisecondsSinceEpoch(0),
+      firstDate: DateTime.fromMillisecondsSinceEpoch(int.parse(orderDetails['date'])),
       lastDate: DateTime.now().add(Duration(
         days: 31,
       )),
@@ -168,8 +188,10 @@ class _OrderScreenState extends State<OrderScreen> {
         context: context,
         builder: (context) {
           final TextEditingController dateController = TextEditingController();
-          final TextEditingController amountController = TextEditingController();
-          final TextEditingController remarksController = TextEditingController();
+          final TextEditingController amountController =
+              TextEditingController();
+          final TextEditingController remarksController =
+              TextEditingController();
           final GlobalKey<FormState> _formKey = new GlobalKey<FormState>();
           return AlertDialog(
             title: Text("Add Settlement"),
@@ -216,14 +238,15 @@ class _OrderScreenState extends State<OrderScreen> {
                     controller: amountController,
                     autofocus: false,
                     inputFormatters: [DecimalTextInputFormatter()],
-                    keyboardType: TextInputType.numberWithOptions(signed: false, decimal: true),
+                    keyboardType: TextInputType.numberWithOptions(
+                        signed: false, decimal: true),
                     validator: (value) {
                       if (value.isEmpty) {
                         return 'Please enter amount';
                       }
 
                       if (!isFloat(value) && !isInt(value)) {
-                        return 'Enver valid amount';
+                        return 'Enter valid amount';
                       }
                       return null;
                     },
@@ -239,7 +262,8 @@ class _OrderScreenState extends State<OrderScreen> {
                     autofocus: false,
                     keyboardType: TextInputType.text,
                     maxLength: 25,
-                    decoration: InputDecoration(labelText: 'Remarks', hintText: 'Max 25 chars allowed'),
+                    decoration: InputDecoration(
+                        labelText: 'Remarks', hintText: 'Max 25 chars allowed'),
                   )
                 ],
               ),
@@ -256,7 +280,10 @@ class _OrderScreenState extends State<OrderScreen> {
                 onPressed: () {
                   if (_formKey.currentState.validate()) {
                     Navigator.pop(context, {
-                      'date': df.parse(dateController.text).millisecondsSinceEpoch.toString(),
+                      'date': df
+                          .parse(dateController.text)
+                          .millisecondsSinceEpoch
+                          .toString(),
                       'amount': amountController.text,
                       'remarks': remarksController.text
                     });
@@ -267,12 +294,17 @@ class _OrderScreenState extends State<OrderScreen> {
           );
         }).then((value) {
       if (value != null) {
-        DateTime date = DateTime.fromMillisecondsSinceEpoch(int.parse(value['date']));
+        DateTime date =
+            DateTime.fromMillisecondsSinceEpoch(int.parse(value['date']));
         int doesExist = settlement.indexWhere((element) {
-          return element.date.millisecondsSinceEpoch == date.millisecondsSinceEpoch;
+          return element.date.millisecondsSinceEpoch ==
+              date.millisecondsSinceEpoch;
         });
         if (doesExist == -1) {
-          settlement.add(Settlement(principle: double.parse(value['amount']), date: date, remark: value['remarks']));
+          settlement.add(Settlement(
+              principle: double.parse(value['amount']),
+              date: date,
+              remark: value['remarks']));
           findSettlements(true);
         } else {
           showDialog(
@@ -283,14 +315,16 @@ class _OrderScreenState extends State<OrderScreen> {
                   actions: [
                     FlatButton(
                       onPressed: () {
-                        settlement[doesExist].principle += double.parse(value['amount']);
+                        settlement[doesExist].principle +=
+                            double.parse(value['amount']);
                         Navigator.pop(context);
                       },
                       child: Text("Add to current date"),
                     ),
                     FlatButton(
                       onPressed: () {
-                        settlement[doesExist].principle = double.parse(value['amount']);
+                        settlement[doesExist].principle =
+                            double.parse(value['amount']);
                         Navigator.pop(context);
                       },
                       child: Text("Set new Amount"),
@@ -305,295 +339,415 @@ class _OrderScreenState extends State<OrderScreen> {
     });
   }
 
+  fetchData(orderDetails) {
+    db
+        .ref(
+            "users/${Utils.userId}/customers/${orderDetails['name']}/${orderDetails['key']}")
+        .once("value")
+        .then((value) {
+      this.orderDetails = value.snapshot.val();
+      this.orderDetails['key'] = orderDetails['key'];
+      items = (this.orderDetails['items'] as Map).keys.toList();
+      initialiseAll(this.orderDetails['settlements']);
+      dataFetchController.sink.add(true);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    orderDetails = ModalRoute.of(context).settings.arguments as Map;
-    items = (orderDetails['items'] as Map).keys.toList();
-    initialiseAll(orderDetails['settlements']);
+    fetchData(ModalRoute.of(context).settings.arguments as Map);
     return Scaffold(
       appBar: AppBar(
         title: Text("Girvi Details"),
         centerTitle: true,
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Container(
-                padding: EdgeInsets.all(10),
-                color: Colors.white,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      body: StreamBuilder(
+          stream: dataFetchController.stream.asBroadcastStream(),
+          builder: (context, snapshot) {
+            if (snapshot.hasData) {
+              return SingleChildScrollView(
+                child: Column(
                   children: [
-                    Row(
-                      children: [
-                        Text(
-                          "Name: ",
-                          style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Container(
+                        padding: EdgeInsets.all(10),
+                        color: Colors.white,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            Row(
+                              children: [
+                                Text(
+                                  "Name: ",
+                                  style: TextStyle(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                                Text(
+                                  "${Utils.capitalize(orderDetails['name'])}",
+                                  style: TextStyle(fontSize: 15),
+                                ),
+                              ],
+                            ),
+                            Row(
+                              children: [
+                                Text("Date: ",
+                                    style: TextStyle(
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.bold)),
+                                Text(
+                                    "${df.format(DateTime.fromMillisecondsSinceEpoch(int.parse(orderDetails['date'].toString())))}",
+                                    style: TextStyle(fontSize: 15)),
+                              ],
+                            ),
+                          ],
                         ),
-                        Text(
-                          "${Utils.capitalize(orderDetails['name'])}",
-                          style: TextStyle(fontSize: 15),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Container(
+                        padding: EdgeInsets.all(10),
+                        color: Colors.white,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            Row(
+                              children: [
+                                Text("Principle: ",
+                                    style: TextStyle(
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.bold)),
+                                Text("₹${orderDetails['principle']}",
+                                    style: TextStyle(fontSize: 15)),
+                              ],
+                            ),
+                            Row(
+                              children: [
+                                Text("Interest: ",
+                                    style: TextStyle(
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.bold)),
+                                Text(
+                                    "${orderDetails['interest']}%${orderDetails['interest_type']}",
+                                    style: TextStyle(fontSize: 15)),
+                              ],
+                            ),
+                          ],
                         ),
-                      ],
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text("Items: ",
+                          style: TextStyle(
+                              fontSize: 15, fontWeight: FontWeight.bold)),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Container(
+                        padding: EdgeInsets.all(10),
+                        color: Colors.white,
+                        child: DataTable(
+                          horizontalMargin: 15,
+                          columnSpacing: 30,
+                          columns: [
+                            DataColumn(
+                                label: Text("Name",
+                                    style: TextStyle(
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.bold))),
+                            DataColumn(
+                                label: Text("Type",
+                                    style: TextStyle(
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.bold))),
+                            DataColumn(
+                                label: Text("Weight",
+                                    style: TextStyle(
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.bold))),
+                            DataColumn(
+                                label: Text("Tunch",
+                                    style: TextStyle(
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.bold))),
+                          ],
+                          rows: List.generate(items.length, (index) {
+                            var item = orderDetails['items'][items[index]];
+                            return DataRow(cells: <DataCell>[
+                              DataCell(Text(Utils.capitalize(item['name']),
+                                  style: TextStyle(
+                                    fontSize: 15,
+                                  ))),
+                              DataCell(Text(item['item_type'],
+                                  style: TextStyle(
+                                    fontSize: 15,
+                                  ))),
+                              DataCell(Text(
+                                  '${item['weight']}${item['weight_type']}',
+                                  style: TextStyle(
+                                    fontSize: 15,
+                                  ))),
+                              DataCell(Text('${item['tunch']}%',
+                                  style: TextStyle(
+                                    fontSize: 15,
+                                  ))),
+                            ]);
+                          }),
+                        ),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text("Settlements: ",
+                          style: TextStyle(
+                              fontSize: 15, fontWeight: FontWeight.bold)),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Container(
+                        color: Colors.white,
+                        padding: EdgeInsets.all(10),
+                        child: StreamBuilder(
+                            stream: settlementsController.stream
+                                .asBroadcastStream(),
+                            builder: (context, snapshot) {
+                              return DataTable(
+                                horizontalMargin: 15,
+                                columnSpacing: 30,
+                                columns: [
+                                  DataColumn(
+                                      label: Text("Date",
+                                          style: TextStyle(
+                                              fontSize: 15,
+                                              fontWeight: FontWeight.bold))),
+                                  DataColumn(
+                                      label: Text("Amount",
+                                          style: TextStyle(
+                                              fontSize: 15,
+                                              fontWeight: FontWeight.bold))),
+                                  DataColumn(
+                                      label: Text("Delete",
+                                          style: TextStyle(
+                                              fontSize: 15,
+                                              fontWeight: FontWeight.bold))),
+                                  DataColumn(
+                                      label: Text("Remarks",
+                                          style: TextStyle(
+                                              fontSize: 15,
+                                              fontWeight: FontWeight.bold))),
+                                ],
+                                rows: List.generate(settlement.length, (index) {
+                                  return DataRow(cells: [
+                                    DataCell(Text(
+                                        df.format(settlement[index].date),
+                                        style: TextStyle(fontSize: 15))),
+                                    DataCell(Text(
+                                        '₹${settlement[index].principle.toStringAsFixed(3)}',
+                                        style: TextStyle(
+                                            fontSize: 15,
+                                            color: (index != 0)
+                                                ? Colors.green
+                                                : Colors.red))),
+                                    (index == 0)
+                                        ? DataCell(SizedBox.shrink())
+                                        : DataCell(
+                                            IconButton(
+                                              icon: Icon(
+                                                Icons.delete,
+                                                color: Colors.red,
+                                              ),
+                                              onPressed: () {
+                                                settlement.removeAt(index);
+                                                findSettlements(true);
+                                              },
+                                            ),
+                                          ),
+                                    DataCell(Container(
+                                        width: 80,
+                                        child: Flexible(
+                                            fit: FlexFit.tight,
+                                            child: Text(
+                                              settlement[index].remark ?? '',
+                                            )))),
+                                  ]);
+                                }),
+                              );
+                            }),
+                      ),
                     ),
                     Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Text("Date: ", style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
-                        Text("${df.format(DateTime.fromMillisecondsSinceEpoch(int.parse(orderDetails['date'].toString())))}",
-                            style: TextStyle(fontSize: 15)),
+                        Text("Click"),
+                        IconButton(
+                          icon: Icon(Icons.add_circle),
+                          onPressed: () {
+                            addSettlement(context);
+                          },
+                        ),
+                        Text("to add more settlements"),
                       ],
                     ),
-                  ],
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Container(
-                padding: EdgeInsets.all(10),
-                color: Colors.white,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    Row(
-                      children: [
-                        Text("Principle: ", style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
-                        Text("₹${orderDetails['principle']}", style: TextStyle(fontSize: 15)),
-                      ],
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text("Final Hisaab: ",
+                          style: TextStyle(
+                              fontSize: 15, fontWeight: FontWeight.bold)),
                     ),
-                    Row(
-                      children: [
-                        Text("Interest: ", style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
-                        Text("${orderDetails['interest']}%${orderDetails['interest_type']}", style: TextStyle(fontSize: 15)),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Text("Items: ", style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Container(
-                padding: EdgeInsets.all(10),
-                color: Colors.white,
-                child: DataTable(
-                  horizontalMargin: 15,
-                  columnSpacing: 30,
-                  columns: [
-                    DataColumn(label: Text("Name", style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold))),
-                    DataColumn(label: Text("Type", style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold))),
-                    DataColumn(label: Text("Weight", style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold))),
-                    DataColumn(label: Text("Tunch", style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold))),
-                  ],
-                  rows: List.generate(items.length, (index) {
-                    var item = orderDetails['items'][items[index]];
-                    return DataRow(cells: <DataCell>[
-                      DataCell(Text(Utils.capitalize(item['name']),
-                          style: TextStyle(
-                            fontSize: 15,
-                          ))),
-                      DataCell(Text(item['item_type'],
-                          style: TextStyle(
-                            fontSize: 15,
-                          ))),
-                      DataCell(Text('${item['weight']}${item['weight_type']}',
-                          style: TextStyle(
-                            fontSize: 15,
-                          ))),
-                      DataCell(Text('${item['tunch']}%',
-                          style: TextStyle(
-                            fontSize: 15,
-                          ))),
-                    ]);
-                  }),
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Text("Settlements: ", style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Container(
-                color: Colors.white,
-                padding: EdgeInsets.all(10),
-                child: StreamBuilder(
-                    stream: settlementsController.stream.asBroadcastStream(),
-                    builder: (context, snapshot) {
-                      return DataTable(
-                        horizontalMargin: 15,
-                        columnSpacing: 30,
-                        columns: [
-                          DataColumn(label: Text("Date", style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold))),
-                          DataColumn(label: Text("Amount", style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold))),
-                          DataColumn(label: Text("Remarks", style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold))),
-                          DataColumn(label: Text("Delete", style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold))),
-                        ],
-                        rows: List.generate(settlement.length, (index) {
-                          return DataRow(cells: [
-                            DataCell(Text(df.format(settlement[index].date), style: TextStyle(fontSize: 15))),
-                            DataCell(Text('₹${settlement[index].principle.toStringAsFixed(3)}',
-                                style: TextStyle(fontSize: 15, color: (index != 0) ? Colors.green : Colors.red))),
-                            DataCell(Container(
-                                width: 80,
-                                child: Flexible(
-                                    fit: FlexFit.tight,
-                                    child: Text(
-                                      settlement[index].remark ?? '',
-                                    )))),
-                            (index == 0)
-                                ? DataCell(SizedBox.shrink())
-                                : DataCell(IconButton(
-                                    icon: Icon(
-                                      Icons.delete,
-                                      color: Colors.red,
-                                    ),
-                                    onPressed: () {
-                                      settlement.removeAt(index);
-                                      findSettlements(true);
-                                    },
-                                  ))
-                          ]);
-                        }),
-                      );
-                    }),
-              ),
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text("Click"),
-                IconButton(
-                  icon: Icon(Icons.add_circle),
-                  onPressed: () {
-                    addSettlement(context);
-                  },
-                ),
-                Text("to add more settlements"),
-              ],
-            ),
-            StreamBuilder(
-                stream: settlementsController.stream.asBroadcastStream(),
-                builder: (context, snapshot) {
-                  return Column(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Container(
-                          padding: EdgeInsets.all(10),
-                          color: Colors.white,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: [
-                              Row(
-                                children: [
-                                  Text("Interest: ", style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
-                                  Text('₹${interestAmount.toStringAsFixed(3)}', style: TextStyle(fontSize: 15)),
+                    StreamBuilder(
+                        stream:
+                        settlementsController.stream.asBroadcastStream(),
+                        builder: (context, snapshot) {
+                          return Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Container(
+                              color: Colors.white,
+                              padding: EdgeInsets.all(10.0),
+                              child: DataTable(
+                                horizontalMargin: 5,
+                                columnSpacing: 10,
+                                columns: [
+                                  DataColumn(
+                                      label: Text('Date',
+                                          style: TextStyle(
+                                              fontSize: 15,
+                                              fontWeight: FontWeight.bold))),
+                                  DataColumn(
+                                      label: Text('Interest',
+                                          style: TextStyle(
+                                              fontSize: 15,
+                                              fontWeight: FontWeight.bold))),
+                                  DataColumn(
+                                      label: Text('Amount',
+                                          style: TextStyle(
+                                              fontSize: 15,
+                                              fontWeight: FontWeight.bold))),
+
+                                ],
+                                rows: [
+                                  DataRow(cells: [
+                                    DataCell(Text(df.format(tillDate),
+                                        style: TextStyle(fontSize: 15))),
+                                    DataCell(Text(
+                                        "₹${interestAmount.toStringAsFixed(2)}",
+                                        style: TextStyle(fontSize: 15))),
+                                    DataCell(Text(
+                                        "₹${totalAmount.toStringAsFixed(2)}",
+                                        style: TextStyle(fontSize: 15))),
+                                  ])
                                 ],
                               ),
-                              Column(
-                                children: [
-                                  Row(
+                            ),
+                          );
+                        }),
+                    StreamBuilder(
+                        stream:
+                            settlementsController.stream.asBroadcastStream(),
+                        builder: (context, snapshot) {
+                          return Column(
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Container(
+                                  padding: EdgeInsets.all(10),
+                                  color: Colors.white,
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceEvenly,
                                     children: [
-                                      Text("Amount: ", style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
-                                      Text('₹${totalAmount.toStringAsFixed(3)}', style: TextStyle(fontSize: 15)),
+                                      Row(
+                                        children: [
+                                          Text("Amount: ",
+                                              style: TextStyle(
+                                                  fontSize: 15,
+                                                  fontWeight:
+                                                      FontWeight.bold)),
+                                          Text(
+                                              '₹${totalAmount.toStringAsFixed(3)}',
+                                              style:
+                                                  TextStyle(fontSize: 15)),
+                                        ],
+                                      ),
+                                      Text(" till date "),
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.end,
+                                        children: [
+                                          Text("${df.format(tillDate)}"),
+                                          FlatButton(
+                                            child:
+                                                Icon(Icons.calendar_today),
+                                            onPressed: () {
+                                              showDialog(
+                                                  context: context,
+                                                  builder: (context) {
+                                                    return AlertDialog(
+                                                      contentPadding:
+                                                          EdgeInsets.all(0),
+                                                      title: Text(
+                                                          "Select Date"),
+                                                      content:
+                                                          buildDatePicker(
+                                                              (DateTime
+                                                                  date) {
+                                                        tillDate = date;
+                                                        findSettlements(
+                                                            true);
+                                                        Navigator.pop(
+                                                            context);
+                                                      }),
+                                                    );
+                                                  });
+                                            },
+                                          )
+                                        ],
+                                      ),
                                     ],
                                   ),
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.end,
+                                ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Container(
+                                  padding: EdgeInsets.all(10),
+                                  color: Colors.white,
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceEvenly,
                                     children: [
-                                      Text("${df.format(tillDate)}"),
-                                      FlatButton(
-                                        child: Icon(Icons.calendar_today),
-                                        onPressed: () {
-                                          showDialog(
-                                              context: context,
-                                              builder: (context) {
-                                                return AlertDialog(
-                                                  contentPadding: EdgeInsets.all(0),
-                                                  title: Text("Select Date"),
-                                                  content: buildDatePicker((DateTime date) {
-                                                    tillDate = date;
-                                                    findSettlements(true);
-                                                    Navigator.pop(context);
-                                                  }),
-                                                );
-                                              });
-                                        },
-                                      )
+                                      Row(
+                                        children: [
+                                          Text("Today's rate ",
+                                              style: TextStyle(
+                                                  fontSize: 15,
+                                                  fontWeight: FontWeight.bold)),
+                                          Text(
+                                              '₹${todayValue.toStringAsFixed(3)}',
+                                              style: TextStyle(
+                                                  fontSize: 15,
+                                                  color:
+                                                      (totalAmount > todayValue)
+                                                          ? Colors.green
+                                                          : Colors.red)),
+                                        ],
+                                      ),
                                     ],
-                                  )
-                                ],
+                                  ),
+                                ),
                               ),
                             ],
-                          ),
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Container(
-                          padding: EdgeInsets.all(10),
-                          color: Colors.white,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: [
-                              Row(
-                                children: [
-                                  Text("Today's rate ", style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
-                                  Text('₹${todayValue.toStringAsFixed(3)}',
-                                      style: TextStyle(fontSize: 15, color: (totalAmount > todayValue) ? Colors.green : Colors.red)),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                  );
-                }),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Text("Final Hisaab: ", style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
-            ),
-            StreamBuilder(
-                stream: settlementsController.stream.asBroadcastStream(),
-                builder: (context, snapshot) {
-                  return Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Container(
-                      color: Colors.white,
-                      padding: EdgeInsets.all(10.0),
-                      child: DataTable(
-                        horizontalMargin: 5,
-                        columnSpacing: 10,
-                        columns: [
-                          DataColumn(label: Text('Date', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold))),
-                          DataColumn(label: Text('Interest', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold))),
-                          DataColumn(label: Text('Amount', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold))),
-                          DataColumn(label: Text('Todays Value', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold))),
-                        ],
-                        rows: [
-                          DataRow(cells: [
-                            DataCell(Text(df.format(tillDate), style: TextStyle(fontSize: 15))),
-                            DataCell(Text("₹${interestAmount.toStringAsFixed(3)}", style: TextStyle(fontSize: 15))),
-                            DataCell(Text("₹${totalAmount.toStringAsFixed(3)}", style: TextStyle(fontSize: 15))),
-                            DataCell(Text("₹${todayValue.toStringAsFixed(3)}", style: TextStyle(fontSize: 15))),
-                          ])
-                        ],
-                      ),
-                    ),
-                  );
-                })
-          ],
-        ),
-      ),
+                          );
+                        }),
+
+                  ],
+                ),
+              );
+            }
+            return Center(child: CircularProgressIndicator());
+          }),
     );
   }
 }

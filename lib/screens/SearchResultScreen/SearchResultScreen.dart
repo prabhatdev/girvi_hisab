@@ -33,7 +33,7 @@ class _SearchResultScreenState extends State<SearchResultScreen> {
               color: Colors.white,
               child: ListTile(
                 onTap: (){
-                    Navigator.pushNamed(context, Routes.ORDER,arguments: customer);
+                    Navigator.pushNamed(context, Routes.ORDER,arguments: {"key":customer["key"],"name":customer['name']});
                 },
                 subtitle: Text(items),
                 title: Row(
@@ -53,8 +53,7 @@ class _SearchResultScreenState extends State<SearchResultScreen> {
                   ),
                   Row(
                     children: [
-                      Icon(Icons.monetization_on),
-                      Text(customers[index]['principle']),
+                      Text("₹"+customers[index]['principle']),
                     ],
                   ),
                 ],
