@@ -5,6 +5,7 @@ import 'package:firebase/firebase.dart';
 import 'package:flutter/material.dart';
 import 'package:girvihisab/main.dart';
 import 'package:girvihisab/screens/AddItem/AddItemScreen.dart';
+import 'package:girvihisab/screens/Logs/RecentScreen.dart';
 import 'package:girvihisab/screens/SearchItem/SearchItemScreen.dart';
 import 'package:girvihisab/utils/constants.dart';
 import 'package:girvihisab/utils/utils.dart';
@@ -25,9 +26,7 @@ class _HomeScreenState extends State<HomeScreen> {
   List<Widget> _widgetOptions = <Widget>[
     SearchItemScreen(),
     AddItemScreen(),
-    Text(
-      'Orders'
-    ),
+    RecordScreen(),
   ];
 
 
@@ -148,7 +147,7 @@ class _HomeScreenState extends State<HomeScreen> {
           child: Scaffold(
               appBar: AppBar(
                 automaticallyImplyLeading: false,
-                title: Text("Home"),
+                title: Text("Girvi Hisab"),
                 centerTitle: true,
                 actions: [
                   IconButton(
@@ -182,8 +181,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   title: Text('Add New'),
                 ),
                 BottomNavigationBarItem(
-                  icon: Icon(Icons.keyboard_return),
-                  title: Text('Return'),
+                  icon: Icon(Icons.history),
+                  title: Text('Recent'),
                 ),
               ],
               currentIndex: selectedIndex,

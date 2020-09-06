@@ -16,6 +16,15 @@ enum filters{
   ITEM_NAME
 }
 
+enum logs{
+  ADD_ORDER,
+  SETTLEMENT_ADDED,
+  SETTLEMENT_DELETED,
+  ORDER_PAID,
+}
+
+
+
 class Pair{
   var left;
   var right;
@@ -87,6 +96,38 @@ class Utils {
         fontSize: 16.0);
   }
 
+  static getLogs(String timeStamp, logs log, String orderId,String userId){
+    if(log==logs.ADD_ORDER){
+      return {
+        "text":"New order added for ${userId}",
+        "timeStamp":timeStamp,
+        "userId":userId,
+        "orderId":orderId
+      };
+    }
+    else if(log==logs.SETTLEMENT_ADDED){
+      return {
+        "text":"Settlement added for ${userId}.",
+        "timeStamp":timeStamp,
+        "userId":userId,
+        "orderId":orderId
+      };
+    }
+    else if(log==logs.SETTLEMENT_DELETED){
+      return {
+        "text":"Settlement deleted for ${userId}.",
+        "timeStamp":timeStamp,
+        "userId":userId,
+        "orderId":orderId
+      };
+    }
+    return {
+      "text":"Some changes done for ${userId}",
+      "timeStamp":timeStamp,
+      "userId":userId,
+      "orderId":orderId
+    };
+  }
 
 
   static Widget errorWidget(Function stateFunction, {String msg, icon: Icons.error_outline}) {

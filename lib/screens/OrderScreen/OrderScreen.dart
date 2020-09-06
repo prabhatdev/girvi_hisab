@@ -126,8 +126,7 @@ class _OrderScreenState extends State<OrderScreen> {
     totalAmount = totalPrinciple + totalInterest;
     isProfitable();
     settlementsController.sink.add(null);
-    if(isUpdate)
-    Utils.showToast("Settlements added.");
+
   }
 
   isProfitable() {
@@ -250,10 +249,11 @@ class _OrderScreenState extends State<OrderScreen> {
                       if (value.isEmpty) {
                         return 'Please enter amount';
                       }
-
                       if (!isFloat(value) && !isInt(value)) {
                         return 'Enter valid amount';
                       }
+                      if(double.parse(value)>totalAmount)
+                        return 'Enter value less than final amount';
                       return null;
                     },
                     decoration: InputDecoration(
@@ -312,6 +312,9 @@ class _OrderScreenState extends State<OrderScreen> {
               date: date,
               remark: value['remarks']));
           findSettlements(true);
+          var logData=Utils.getLogs(DateTime.now().millisecondsSinceEpoch.toString(), logs.SETTLEMENT_ADDED, orderDetails['key'], orderDetails['name']);
+          db.ref("logs/${Utils.userId}").push().set(logData);
+          Utils.showToast("Settlements added.");
         } else {
           showDialog(
               context: context,
@@ -568,6 +571,9 @@ class _OrderScreenState extends State<OrderScreen> {
                                               onPressed: () {
                                                 settlement.removeAt(index);
                                                 findSettlements(true);
+                                                var logData=Utils.getLogs(DateTime.now().millisecondsSinceEpoch.toString(), logs.SETTLEMENT_DELETED, orderDetails['key'], orderDetails['name']);
+                                                db.ref("logs/${Utils.userId}").push().set(logData);
+                                                Utils.showToast("Settlements deleted.");
                                               },
                                             ),
                                           ),

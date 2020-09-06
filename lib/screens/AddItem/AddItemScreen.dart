@@ -746,13 +746,17 @@ class _AddItemScreenState extends State<AddItemScreen> {
                         settlement[i.toString()]=settlements[i];
                       }
                       dataToPush['settlements']=settlement;
-                      await db.ref("users/${userId}/customers/${nameController.text.toLowerCase()}").push().set(dataToPush);
+                      String orderKey=await db.ref("users/${userId}/customers/${nameController.text.toLowerCase()}").push().key;
+                      db.ref("users/$userId/customers/${nameController.text.toLowerCase()}/$orderKey").set(dataToPush);
 
                       for (int i = 0; i < allItems.length; i++) {
                         await db.ref("users/${userId}/itemsNames/${allItems[i]['name']}").set('1');
                       }
-
+                      var logData=Utils.getLogs(DateTime.now().millisecondsSinceEpoch.toString(), logs.ADD_ORDER, orderKey, nameController.text);
+                      await db.ref("logs/$userId").push().set(logData);
+                      print(orderKey);
                       Utils.showToast("Item Added");
+
                       allItems.clear();
                       settlements.clear();
                       settlementsController.sink.add(null);
