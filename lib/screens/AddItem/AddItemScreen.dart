@@ -334,7 +334,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
                       }
 
                       if (!isFloat(value) && !isInt(value)) {
-                        return 'Enver valid amount';
+                        return 'Enter valid amount';
                       }
                       return null;
                     },

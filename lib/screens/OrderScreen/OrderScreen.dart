@@ -8,6 +8,7 @@ import 'package:girvihisab/utils/constants.dart';
 import 'package:girvihisab/utils/utils.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_date_pickers/flutter_date_pickers.dart' as dp;
+import 'package:jiffy/jiffy.dart';
 import 'package:string_validator/string_validator.dart';
 
 class OrderScreen extends StatefulWidget {
@@ -22,6 +23,7 @@ class _OrderScreenState extends State<OrderScreen> {
   double interestAmount = 0;
   double principleAmount = 0;
   double totalAmount = 0;
+  String totalDuration='';
   List<Settlement> settlement = List<Settlement>();
 
   StreamController settlementsController = StreamController.broadcast();
@@ -90,6 +92,8 @@ class _OrderScreenState extends State<OrderScreen> {
   }
 
   findSettlements(bool isUpdate) {
+    DateTime orderDate=DateTime.fromMillisecondsSinceEpoch(int.parse(orderDetails['date']));
+    totalDuration=Jiffy("${orderDate.year}-${orderDate.month}-${orderDate.day}","yyyy-MM-dd").from("${tillDate.year}-${tillDate.month}-${tillDate.day}");
     settlement.sort((a, b) {
       return (a.date.millisecondsSinceEpoch < b.date.millisecondsSinceEpoch)
           ? -1
@@ -122,6 +126,8 @@ class _OrderScreenState extends State<OrderScreen> {
     totalAmount = totalPrinciple + totalInterest;
     isProfitable();
     settlementsController.sink.add(null);
+    if(isUpdate)
+    Utils.showToast("Settlements added.");
   }
 
   isProfitable() {
@@ -567,11 +573,9 @@ class _OrderScreenState extends State<OrderScreen> {
                                           ),
                                     DataCell(Container(
                                         width: 80,
-                                        child: Flexible(
-                                            fit: FlexFit.tight,
-                                            child: Text(
-                                              settlement[index].remark ?? '',
-                                            )))),
+                                        child: Text(
+                                          settlement[index].remark ?? '',
+                                        ))),
                                   ]);
                                 }),
                               );
@@ -616,6 +620,11 @@ class _OrderScreenState extends State<OrderScreen> {
                                               fontSize: 15,
                                               fontWeight: FontWeight.bold))),
                                   DataColumn(
+                                      label: Text('Principle',
+                                          style: TextStyle(
+                                              fontSize: 15,
+                                              fontWeight: FontWeight.bold))),
+                                  DataColumn(
                                       label: Text('Interest',
                                           style: TextStyle(
                                               fontSize: 15,
@@ -625,11 +634,18 @@ class _OrderScreenState extends State<OrderScreen> {
                                           style: TextStyle(
                                               fontSize: 15,
                                               fontWeight: FontWeight.bold))),
+                                  DataColumn(
+                                      label: Text('Duration',
+                                          style: TextStyle(
+                                              fontSize: 15,
+                                              fontWeight: FontWeight.bold)))
 
                                 ],
                                 rows: [
                                   DataRow(cells: [
                                     DataCell(Text(df.format(tillDate),
+                                        style: TextStyle(fontSize: 15))),
+                                    DataCell(Text("₹${orderDetails['principle']}",
                                         style: TextStyle(fontSize: 15))),
                                     DataCell(Text(
                                         "₹${interestAmount.toStringAsFixed(2)}",
@@ -637,6 +653,10 @@ class _OrderScreenState extends State<OrderScreen> {
                                     DataCell(Text(
                                         "₹${totalAmount.toStringAsFixed(2)}",
                                         style: TextStyle(fontSize: 15))),
+                                    DataCell(Text(
+                                        "₹$totalDuration",
+                                        style: TextStyle(fontSize: 15))),
+
                                   ])
                                 ],
                               ),
