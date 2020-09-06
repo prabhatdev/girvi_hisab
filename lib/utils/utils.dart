@@ -121,6 +121,14 @@ class Utils {
         "orderId":orderId
       };
     }
+    else if(log==logs.ORDER_PAID){
+      return {
+        "text":"Order amount settled for ${userId}",
+        "timeStamp":timeStamp,
+        "userId":userId,
+        "orderId":orderId
+      };
+    }
     return {
       "text":"Some changes done for ${userId}",
       "timeStamp":timeStamp,

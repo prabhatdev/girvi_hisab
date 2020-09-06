@@ -6,6 +6,8 @@ import 'package:girvihisab/utils/utils.dart';
 import 'package:intl/intl.dart';
 import 'package:jiffy/jiffy.dart';
 
+import '../../main.dart';
+
 class RecordScreen extends StatefulWidget {
   @override
   _RecordScreenState createState() => _RecordScreenState();
@@ -53,6 +55,9 @@ class _RecordScreenState extends State<RecordScreen> {
               leading: Icon(Icons.history,color: Colors.orange,),
               title: Text(recents[index]['text']),
               subtitle: Text(Jiffy(time).yMMMEdjm),
+              onTap: (){
+                Navigator.pushNamed(context, Routes.ORDER,arguments: {"key":recents[index]["orderId"],"name":recents[index]['userId']});
+              },
             );
           },itemCount: recents.length,);
         }

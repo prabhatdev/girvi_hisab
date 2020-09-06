@@ -660,7 +660,7 @@ class _OrderScreenState extends State<OrderScreen> {
                                         "₹${totalAmount.toStringAsFixed(2)}",
                                         style: TextStyle(fontSize: 15))),
                                     DataCell(Text(
-                                        "₹$totalDuration",
+                                        "$totalDuration",
                                         style: TextStyle(fontSize: 15))),
 
                                   ])
@@ -767,7 +767,26 @@ class _OrderScreenState extends State<OrderScreen> {
                             ],
                           );
                         }),
-
+                    StreamBuilder(
+                      stream: settlementsController.stream.asBroadcastStream(),
+                      builder: (context, snapshot) {
+                        if(totalAmount>-1 && totalAmount<1){
+                          return Center(child: Image.asset('assets/images/paid.jpg',width: 150,));
+                        }
+                        return FlatButton(
+                            color: Colors.redAccent,
+                            onPressed: (){
+                          settlement.add(Settlement(
+                              principle: totalAmount,
+                              date: DateTime.now(),
+                              remark: "Amount Settled."));
+                          findSettlements(true);
+                          var logData=Utils.getLogs(DateTime.now().millisecondsSinceEpoch.toString(), logs.ORDER_PAID, orderDetails['key'], orderDetails['name']);
+                          db.ref("logs/${Utils.userId}").push().set(logData);
+                          Utils.showToast("Amount Settled");
+                        }, child: Text("Settle Total Amount ₹${totalAmount.toStringAsFixed(2)}",style: TextStyle(color: Colors.white),));
+                      }
+                    )
                   ],
                 ),
               );
